@@ -2,3 +2,250 @@
 require("dotenv").config();
 
 var keys = require("./keys.js");
+
+// 1 define a terminal global app name
+// 2 define commands
+// 3 extract the argument
+
+// liri song bonjovi
+// var songName = getSongName();
+
+// send song name to spotifiy api
+// display the data on the screen
+
+    
+    // Configure APIs
+    
+var keys = require("./keys.js");
+
+// Twitter
+var Twitter = require("twitter");
+var twitter = new Twitter(keys.twitter);
+
+// Spotify
+var Spotify = require("node-spotify-api");
+var spotify = new Spotify(keys.spotify);
+
+// OMDB
+var request = require("request");
+
+// File System
+var fs = require("fs");
+
+// Operating System (for end-of-line)
+var os = require("os");
+
+
+    // Initialize
+    
+process.stdout.write("\033c");
+
+// Create a log file if it does not exist
+var file_log = "log.txt";
+
+if (!fs.existsSync(file_log)) {
+    fs.writeFile(file_log, "", error => {
+        if (error) {
+            console.log(`Error in creating "${file_log}"\n${error}\n\n\n`);
+            return;
+        }
+    });
+}
+
+var option = process.argv[2];
+var title = process.argv.slice(3).join(" ");
+
+mainMenu(option, title);
+
+    
+    // Menu options
+    
+function mainMenu(option = "", title) {
+    switch (option.toLowerCase()) {
+        case "my-tweets":
+            getTweets();
+            break;
+
+        case "spotify-this-song":
+            getSong((title) ? title : "The Sign");
+            break;
+
+        case "movie-this":
+            getMovie((title) ? title : "Mr. Nobody");
+            break;
+
+        case "do-what-it-says":
+            doWhatItSays();
+            break;
+
+        default:
+            saveOutput(`Error:\n"${option}" is a not valid command.\nPlease select "my-tweets", "spotify-this-song", "movie-this", or "do-what-it-says".\n\n\n`);
+
+    }
+}
+
+
+function getTweets() {
+    var parameters = {
+        "count": 20,
+        "screen_name": "BobBarker000000"
+    };
+
+    twitter.get("statuses/user_timeline", parameters, (error, tweets, response) => {
+        if (error) {
+            saveOutput(`Error in calling "Twitter"\n${error}\n\n\n`);
+            return;
+        }
+
+            
+            // Write to terminal and file
+            
+        let output = "My Tweets\n";
+
+        output += addSeparator();
+
+        tweets.forEach(t => {
+            // Extract date information
+            [, month, day, time, , year] = t.created_at.split(" ");
+            [hour, minute] = time.split(":").map(x => parseInt(x, 10));
+
+            // Format the time stamp
+            var timeStamp = `${month} ${day} ${year}, ${hour % 12}:${minute} ${(hour < 12) ? "AM" : "PM"}`;
+
+            output += `@${t.user.screen_name} · ${timeStamp}\n"${t.text}"\n\n`;
+        });
+
+        output += addSeparator() + "\n";
+
+        saveOutput(output);
+    });
+}
+
+
+function getSong(title) {
+    var parameters = {
+        "type": "track",
+        "query": title,
+        "limit": 1
+    };
+
+    spotify.search(parameters, (error, data) => {
+        if (error) {
+            saveOutput(`Error in calling "Spotify"\n${error}\n\n\n`);
+            return;
+        }
+
+        // For simplicity, we assume that Spotify always finds the right song
+        var song = data.tracks.items[0];
+
+        // Display all artists
+        var artists = song.artists.map(a => a.name);
+
+            
+            Write to terminal and file
+            
+        let output = "Spotify This Song\n";
+
+        output += addSeparator();
+
+        output += `Artists      : ${artists.join(", ")}\n`;
+        output += `Album        : ${song.album.name}\n`;
+        output += `Track        : ${song.name}\n`;
+        output += `Preview link : ${song.preview_url}\n\n`;
+
+        output += addSeparator() + "\n";
+
+        saveOutput(output);
+    });
+}
+
+
+function getMovie(title) {
+    var api_url = `https://www.omdbapi.com/?apikey=${keys.omdb.key}&t=${title}&plot=short`;
+
+    request(api_url, (error, response, body) => {
+        if (error) {
+            saveOutput(`Error in calling "OMDB"\n${error}\n\n\n`);
+            return;
+        }
+
+        if (response.statusCode !== 200) {
+            saveOutput(`Error in calling "OMDB"\n${response}\n\n\n`);
+            return;
+        }
+
+        var movie = JSON.parse(body);
+
+            
+            // Write to terminal and file
+            
+        let output = "Movie This\n";
+
+        output += addSeparator();
+
+        output += `Title          : ${movie.Title}\n`;
+        output += `Release year   : ${movie.Year}\n`;
+        output += `Plot           : ${movie.Plot}\n`;
+        output += `Actors         : ${movie.Actors}\n`;
+        output += `IMDB           : ${movie.imdbRating}\n`;
+        output += `RottenTomatoes : ${(movie.Ratings[1]) ? movie.Ratings[1].Value : "N/A"}\n`;
+        output += `Production     : ${movie.Country}\n`;
+        output += `Language       : ${movie.Language}\n\n`;
+
+        output += addSeparator() + "\n";
+
+        saveOutput(output);
+    });
+}
+
+
+function doWhatItSays() {
+    fs.readFile("random.txt", "utf8", (error, data) => {
+        if (error) {
+            saveOutput(`Error in calling "Do What It Says":\n${error}\n\n\n`);
+            return;
+        }
+
+        // Use require("os").EOL to split into lines, independent of the platform
+        var commands = data.split(os.EOL);
+
+
+            // Write to terminal and file
+
+        if (commands.length === 1 && commands[0] === "") {
+            saveOutput(`Error in calling "Do What It Says":\nPlease enter a command in "random.txt".\n\n\n`);
+        }
+
+        commands.forEach(c => {
+            if (c === "") {
+                return;
+            }
+
+            // Use indexOf instead of split, in case the title has a comma
+            var index = c.indexOf(",");
+
+            var option = (index >= 0) ? c.substring(0, index).trim().toLowerCase() : c;
+            var title = (index >= 0) ? c.substring(index + 1).trim() : undefined;
+
+            mainMenu(option, title);
+        });
+    });
+}
+
+
+function addSeparator() {
+    return "-".repeat(60) + "\n\n";
+}
+
+
+function saveOutput(output) {
+    // Write to the terminal
+    console.log(output);
+
+    // Write to the log file
+    fs.appendFile(file_log, output, error => {
+        if (error) {
+            return console.log(`Error in appending to "${file_log}"\n${error}\n\n\n`);
+        }
+    });
+}
