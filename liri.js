@@ -142,7 +142,7 @@ function getSong(title) {
         var artists = song.artists.map(a => a.name);
 
             
-            Write to terminal and file
+            // Write to terminal and file
             
         let output = "Spotify This Song\n";
 
@@ -160,92 +160,3 @@ function getSong(title) {
 }
 
 
-function getMovie(title) {
-    var api_url = `https://www.omdbapi.com/?apikey=${keys.omdb.key}&t=${title}&plot=short`;
-
-    request(api_url, (error, response, body) => {
-        if (error) {
-            saveOutput(`Error in calling "OMDB"\n${error}\n\n\n`);
-            return;
-        }
-
-        if (response.statusCode !== 200) {
-            saveOutput(`Error in calling "OMDB"\n${response}\n\n\n`);
-            return;
-        }
-
-        var movie = JSON.parse(body);
-
-            
-            // Write to terminal and file
-            
-        let output = "Movie This\n";
-
-        output += addSeparator();
-
-        output += `Title          : ${movie.Title}\n`;
-        output += `Release year   : ${movie.Year}\n`;
-        output += `Plot           : ${movie.Plot}\n`;
-        output += `Actors         : ${movie.Actors}\n`;
-        output += `IMDB           : ${movie.imdbRating}\n`;
-        output += `RottenTomatoes : ${(movie.Ratings[1]) ? movie.Ratings[1].Value : "N/A"}\n`;
-        output += `Production     : ${movie.Country}\n`;
-        output += `Language       : ${movie.Language}\n\n`;
-
-        output += addSeparator() + "\n";
-
-        saveOutput(output);
-    });
-}
-
-
-function doWhatItSays() {
-    fs.readFile("random.txt", "utf8", (error, data) => {
-        if (error) {
-            saveOutput(`Error in calling "Do What It Says":\n${error}\n\n\n`);
-            return;
-        }
-
-        // Use require("os").EOL to split into lines, independent of the platform
-        var commands = data.split(os.EOL);
-
-
-            // Write to terminal and file
-
-        if (commands.length === 1 && commands[0] === "") {
-            saveOutput(`Error in calling "Do What It Says":\nPlease enter a command in "random.txt".\n\n\n`);
-        }
-
-        commands.forEach(c => {
-            if (c === "") {
-                return;
-            }
-
-            // Use indexOf instead of split, in case the title has a comma
-            var index = c.indexOf(",");
-
-            var option = (index >= 0) ? c.substring(0, index).trim().toLowerCase() : c;
-            var title = (index >= 0) ? c.substring(index + 1).trim() : undefined;
-
-            mainMenu(option, title);
-        });
-    });
-}
-
-
-function addSeparator() {
-    return "-".repeat(60) + "\n\n";
-}
-
-
-function saveOutput(output) {
-    // Write to the terminal
-    console.log(output);
-
-    // Write to the log file
-    fs.appendFile(file_log, output, error => {
-        if (error) {
-            return console.log(`Error in appending to "${file_log}"\n${error}\n\n\n`);
-        }
-    });
-}
