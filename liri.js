@@ -7,7 +7,7 @@ var keys = require("./keys.js");
 // 2 define commands
 // 3 extract the argument
 
-// liri song bonjovi
+// liri song living on a prayer
 // var songName = getSongName();
 
 // send song name to spotifiy api
