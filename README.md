@@ -7,8 +7,7 @@
 
 To begin just type "node liri.js" in the command line and hit enter
 
-![](images/SceenShot1.png)
-
+![](images/ScreenShot1.png)
 
 Search Concerts with Bands In Town
 
