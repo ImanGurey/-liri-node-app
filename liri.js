@@ -134,4 +134,4 @@ function liriSearch() {
 };
 
 // Calling the main LIRI search function to begin the app
-
+liriSearch();

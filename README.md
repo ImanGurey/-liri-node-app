@@ -1,26 +1,17 @@
 # -liri-node-app
 
 
-For this assignment, we were asked to create a compatibility-based FriendFinder. This application asks users to take a 10-question survey and then compares their answers to other users to find the best match.
+##- A Node based SIRI CLI app that makes searches to Spotify, BandsInTown, and OMDB API's.
 
-Getting Started
 
-This application is hosted on Heroku! Click the link below for a demo!
 
-https://imanfriendfinder1app.herokuapp.com/
+To begin just type "node liri.js" in the command line and hit enter
 
-Take the survey and you will be able to see the user whose answers most similarly matched your own.
+![](images/SceenShot1.jpg)
 
-Please note, all fields are required!
 
-Built With
+Search Concerts with Bands In Town
 
-Node.js
+To search for a concert just type "node liri concert-this any artist who is touring". LIRI will then take the search and apply it to the Bands In Town API and return the soonest result for a concert for that artist. Below is an image of a BandsInTown search. I underlined in red how to type the command.
 
-Express NPM Package
-
-Body-Parser NPM Package
-
-Path NPM Package
-
-Twitter-Bootstrap - Framework
+![](images/SceenShot2.jpg)
