@@ -1,7 +1,7 @@
 # -liri-node-app
 
 
-##- A Node based SIRI CLI app that makes searches to Spotify, BandsInTown, and OMDB API's.
+##A Node based SIRI CLI app that makes searches to Spotify, BandsInTown, and OMDB API's.
 
 
 
